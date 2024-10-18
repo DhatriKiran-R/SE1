@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CampusCafeRoasterrrr</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="sign_up_text">Sign Up</string>
+    <string name="login_text">Login</string>
+    <string name="login">Login</string>
+    <string name="already_have_account">Already have an account?</string> <!-- Suggested text -->
+    <string name="swap_requests">Swap Requests</string>
+    <string name="student_tracking">Student Tracking</string>
+    <string name="calendar">Calendar</string>
+    <string name="logout">Logout</string>
+    <string name="shift_management">Shift Management</string>
+    <string name="profile">Profile</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="geeks_for_geeks">Geeks for Geeks</string>
+    <string name="clockin_id">Clockin ID</string>
+    <string name="submit_shift">Submit Shift</string>
+    <string name="select_end_time">Select End Time</string>
+    <string name="select_start_time">Select Start Time</string>
+    <string-array name="roles_array">
+        <item>Cook</item>
+        <item>Server</item>
+    </string-array>
+    <string-array name="locations_array">
+        <item>Commons</item>
+        <item>Withe Connection</item>
+    </string-array>
+</resources>

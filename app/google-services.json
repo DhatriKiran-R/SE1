@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "399796863664",
+    "project_id": "campuscaferoasterrrr",
+    "storage_bucket": "campuscaferoasterrrr.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399796863664:android:282e9aba3826c1c1647175",
+        "android_client_info": {
+          "package_name": "com.example.campuscaferoasterrrr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPj30dHQGl04XR9WK3B0Akcu7FcvZfPsw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
