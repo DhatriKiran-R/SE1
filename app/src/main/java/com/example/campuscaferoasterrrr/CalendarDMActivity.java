@@ -1,18 +1,14 @@
 package com.example.campuscaferoasterrrr;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -21,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CalendarDMActivity extends AppCompatActivity {
 
@@ -32,13 +29,7 @@ public class CalendarDMActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_calendar_dmactivity);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         // Initialize UI elements
         calendarView = findViewById(R.id.calendar_view);
@@ -58,54 +49,74 @@ public class CalendarDMActivity extends AppCompatActivity {
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(locationAdapter);
 
-        checkShiftsButton.setOnClickListener(v -> checkShifts());
-    }
-
-    private void checkShifts() {
-        // Get selected date
+        // Set default date to today's date initially
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(calendarView.getDate());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        String selectedDate = sdf.format(calendar.getTime());
+        AtomicReference<String> selectedDate = new AtomicReference<>(sdf.format(calendar.getTime()));  // Set current date as default
+        System.out.println("Initial Selected Date (default): " + selectedDate);
 
-        // Debugging: Print the selected date to verify it's correct
-        System.out.println("Selected Date: " + selectedDate);
+        // Attach a listener to capture date selection from CalendarView
+        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+            Calendar selectedCalendar = Calendar.getInstance();
+            selectedCalendar.set(year, month, dayOfMonth);  // Set the selected date
+            selectedDate.set(sdf.format(selectedCalendar.getTime()));  // Update the selected date
+            System.out.println("Selected Date: " + selectedDate);  // Debugging
+        });
 
-        String selectedWorkRole = workRoleSpinner.getSelectedItem().toString();
-        String selectedLocation = locationSpinner.getSelectedItem().toString();
-
-        // Fetch shifts from Firestore
-        fetchShifts(selectedDate, selectedWorkRole, selectedLocation);
+        // When the "Check Shifts" button is clicked
+        checkShiftsButton.setOnClickListener(v -> checkShifts(selectedDate.get()));
     }
 
+    private void checkShifts(String selectedDate) {
+        // Get selected work role and location from the spinners
+        String selectedWorkRole = workRoleSpinner.getSelectedItem().toString().trim().toLowerCase(Locale.getDefault());
+        String selectedLocation = locationSpinner.getSelectedItem().toString().trim().toLowerCase(Locale.getDefault());
+
+        // Debugging: Print the values to ensure correct string matches
+        System.out.println("Query Work Role: " + selectedWorkRole);
+        System.out.println("Query Location: " + selectedLocation);
+
+        // Fetch shifts from Firestore based on selected values
+        fetchShifts(selectedDate, selectedWorkRole, selectedLocation);  // Use the updated selectedDate
+    }
+
+    @SuppressLint("SetTextI18n")
     private void fetchShifts(String date, String workRole, String location) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Debugging: Check the parameters being passed
+        // Normalize inputs to lowercase to avoid case sensitivity issues
+        String normalizedWorkRole = workRole;
+        String normalizedLocation = location;
+
+        // Debugging: Print normalized values
         System.out.println("Fetching shifts for Date: " + date + ", Role: " + workRole + ", Location: " + location);
 
         db.collection("shifts")
                 .whereEqualTo("workRole", workRole)
                 .whereEqualTo("location", location)
-                .whereEqualTo("date", date) // Make sure 'date' is stored in the same format
+                .whereEqualTo("date", date)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        ArrayList<String> shifts = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String studentEmail = document.getString("studentClockInId"); // Adjust based on your structure
-                            System.out.println(studentEmail);
-
-                            shifts.add(studentEmail);
+                        if (task.getResult().isEmpty()) {
+                            System.out.println("No shifts found for the given date, role, and location.");
+                            shiftsTextView.setText("No shifts scheduled for this date.");
+                        } else {
+                            ArrayList<String> shifts = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String studentEmail = document.getString("studentClockInId");
+                                System.out.println("Shift found: " + studentEmail);
+                                shifts.add(studentEmail);
+                            }
+                            displayShifts(shifts);
                         }
-                        displayShifts(shifts);
                     } else {
+                        System.out.println("Error fetching shifts: " + task.getException().getMessage());
                         shiftsTextView.setText("Error fetching shifts: " + task.getException().getMessage());
                     }
                 });
     }
-
-
+    @SuppressLint("SetTextI18n")
     private void displayShifts(ArrayList<String> shifts) {
         if (shifts.isEmpty()) {
             shiftsTextView.setText("No shifts scheduled for this date.");
@@ -116,5 +127,29 @@ public class CalendarDMActivity extends AppCompatActivity {
             }
             shiftsTextView.setText(builder.toString());
         }
+    }
+
+    // Optionally, you can test the query with hardcoded values for debugging
+    private void testQueryWithHardcodedValues() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("shifts")
+                .whereEqualTo("workRole", "cook")
+                .whereEqualTo("location", "commons")
+                .whereEqualTo("date", "15/10/2024")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        ArrayList<String> shifts = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String studentEmail = document.getString("studentClockInId");
+                            System.out.println("Shift found: " + studentEmail);
+                            shifts.add(studentEmail);
+                        }
+                        displayShifts(shifts);
+                    } else {
+                        shiftsTextView.setText("Error fetching shifts: " + task.getException().getMessage());
+                    }
+                });
     }
 }

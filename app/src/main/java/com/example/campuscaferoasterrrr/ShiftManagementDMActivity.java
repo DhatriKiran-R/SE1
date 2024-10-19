@@ -35,14 +35,12 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ShiftManagementDMActivity extends AppCompatActivity {
-
     private Spinner roleSpinner, studentSpinner;
     private RadioGroup locationRadioGroup;
     private TextView startTimeText, endTimeText;
     private Button submitButton;
     private String startTime, endTime;
     private Calendar startTimeCalendar, endTimeCalendar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +104,6 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
             return true; // Return true to indicate the item was handled
         });
     }
-
     private void showDateTimePicker(Calendar calendar, TextView textView) {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -134,7 +131,6 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
         }, year, month, day);
         datePickerDialog.show();
     }
-
     private void fetchStudents() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("users") // Assuming 'users' is your collection name
@@ -265,15 +261,15 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
                         } else {
                             // Prepare shift data
                             Map<String, Object> shiftData = new HashMap<>();
-                            shiftData.put("location", location);
+                            shiftData.put("location", location.trim().toLowerCase(Locale.getDefault()));
                             shiftData.put("startTime", startTime);
                             shiftData.put("endTime", endTime);
                             shiftData.put("duration", duration); // Use calculated duration
-                            shiftData.put("workRole", role);
+                            shiftData.put("workRole", role.trim().toLowerCase(Locale.getDefault()));
                             shiftData.put("studentClockInId", studentClockInId);
                             shiftData.put("weekId", weekId); // Add the week ID
                             shiftData.put("shiftId", generateShiftId()); // Generate a unique shift ID
-                            shiftData.put("date", startTime.substring(0, 9));
+                            shiftData.put("date", startTime.substring(0, 10));
                             // Insert the shift data into Firestore
                             db.collection("shifts").add(shiftData)
                                     .addOnSuccessListener(documentReference -> {
@@ -289,11 +285,6 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
                     }
                 });
     }
-
-
-
-
-
     private String getWeekId(String startTime) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
