@@ -50,8 +50,10 @@ public class LoginActivity extends AppCompatActivity {
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            System.out.println(1);
                             // Successfully logged in
                             FirebaseUser user = mAuth.getCurrentUser();
+                            System.out.println(2);
                             if (user != null) {
                                 // Create a Firestore instance
                                 FirebaseFirestore db = FirebaseFirestore.getInstance();
