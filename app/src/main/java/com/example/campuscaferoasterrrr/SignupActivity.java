@@ -35,7 +35,9 @@ public class SignupActivity extends AppCompatActivity {
         EditText emailField = findViewById(R.id.email);
         EditText clockinIdField = findViewById(R.id.clockin_id);
         EditText passwordField = findViewById(R.id.password);
-
+        EditText nameField = findViewById(R.id.name);
+        EditText phoneField = findViewById(R.id.phone);
+        EditText ssnField = findViewById(R.id.ssn);
         Button signupButton = findViewById(R.id.signup_button);
         TextView loginLink = findViewById(R.id.login_link);  // Login link
 
@@ -44,7 +46,9 @@ public class SignupActivity extends AppCompatActivity {
             String email = emailField.getText().toString().trim();
             String password = passwordField.getText().toString().trim();
             String clockinId = clockinIdField.getText().toString().trim();
-
+            String name = nameField.getText().toString().trim();
+            String phone = phoneField.getText().toString().trim();
+            String ssn = ssnField.getText().toString().trim();
             // Validate email and password
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(SignupActivity.this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
@@ -57,16 +61,16 @@ public class SignupActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // User successfully signed up
                             FirebaseUser user = mAuth.getCurrentUser();
-
                             // Create a Firestore instance
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
-
                             // Prepare user data
                             Map<String, Object> userData = new HashMap<>();
                             userData.put("email", email);
                             userData.put("role", "studentWorker"); // Change to "diningManager" based on user input
                             userData.put("clockinId", clockinId);
-
+                            userData.put("name", name);
+                            userData.put("phone", phone);
+                            userData.put("ssn", ssn);
                             // Store user data in Firestore
                             db.collection("users").document(user.getUid())
                                     .set(userData)

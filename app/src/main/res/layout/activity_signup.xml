@@ -20,12 +20,22 @@
         android:layout_marginBottom="24dp" />
 
     <EditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name"
+        android:inputType="text"
+        android:layout_below="@id/signup_title"
+        android:layout_marginBottom="24dp"
+        android:padding="12dp"/>
+
+    <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/email"
         android:inputType="textEmailAddress"
-        android:layout_below="@id/signup_title"
+        android:layout_below="@id/name"
         android:layout_marginBottom="16dp"
         android:padding="12dp" />
 
@@ -39,6 +49,7 @@
         android:layout_marginBottom="16dp"
         android:padding="12dp"/>
 
+
     <EditText
         android:id="@+id/clockin_id"
         android:layout_width="match_parent"
@@ -49,12 +60,32 @@
     android:layout_marginBottom="24dp"
     android:padding="12dp"/>
 
+    <EditText
+        android:id="@+id/phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Phone Number"
+        android:inputType="text"
+        android:layout_below="@id/clockin_id"
+        android:layout_marginBottom="24dp"
+        android:padding="12dp"/>
+
+    <EditText
+        android:id="@+id/ssn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="SSN"
+        android:inputType="text"
+        android:layout_below="@id/phone"
+        android:layout_marginBottom="24dp"
+        android:padding="12dp"/>
+
     <Button
         android:id="@+id/signup_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sign_up"
-        android:layout_below="@id/clockin_id"
+        android:layout_below="@id/ssn"
         android:textColor="@android:color/white" />
 
     <!-- New TextView for login redirection -->

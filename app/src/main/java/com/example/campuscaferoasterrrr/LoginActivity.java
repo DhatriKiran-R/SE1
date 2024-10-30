@@ -25,39 +25,33 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-
         // Set up UI elements
         EditText emailField = findViewById(R.id.email);
         EditText passwordField = findViewById(R.id.password);
         Button loginButton = findViewById(R.id.login_button);
         TextView signUpLink = findViewById(R.id.sign_up_link);  // Sign-up link
-
+        TextView reset_password_link = findViewById(R.id.reset_password_link);
         // Handle login button click
         loginButton.setOnClickListener(v -> {
             String email = emailField.getText().toString().trim();
             String password = passwordField.getText().toString().trim();
-
             // Validate email and password
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(LoginActivity.this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             // Sign in the user
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             System.out.println(1);
-                            // Successfully logged in
                             FirebaseUser user = mAuth.getCurrentUser();
                             System.out.println(2);
                             if (user != null) {
                                 // Create a Firestore instance
                                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-
                                 // Retrieve user data
                                 db.collection("users").document(user.getUid())
                                         .get()
@@ -97,6 +91,11 @@ public class LoginActivity extends AppCompatActivity {
         // Handle sign-up link click to go to SignupActivity
         signUpLink.setOnClickListener(v -> {
             Intent signUpIntent = new Intent(LoginActivity.this, SignupActivity.class);
+            startActivity(signUpIntent);
+        });
+
+        reset_password_link.setOnClickListener(v -> {
+            Intent signUpIntent = new Intent(LoginActivity.this, ResetPassword.class);
             startActivity(signUpIntent);
         });
 

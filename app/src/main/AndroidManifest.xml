@@ -16,8 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
-        <activity android:name=".CalendarSWActivity" /> <!-- Add this line -->
-
+        <activity
+            android:name=".ResetPassword"
+            android:exported="false"/>
+        <activity android:name=".CalendarSWActivity"/> <!-- Add this line -->
         <activity
             android:name=".RequestSwapsActivity"
             android:exported="false"/>

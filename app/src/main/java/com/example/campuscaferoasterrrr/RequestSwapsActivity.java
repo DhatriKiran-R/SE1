@@ -1,154 +1,223 @@
 package com.example.campuscaferoasterrrr;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ArrayAdapter;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class RequestSwapsActivity extends AppCompatActivity {
 
-    private Spinner shiftsSpinner;
-    private EditText coveringStudentEmail;
-    private Button submitSwapRequestButton;
-
+    private RecyclerView shiftsRecyclerView;
     private FirebaseFirestore db;
-    private ArrayList<String> shiftList; // Store shift IDs
-    private ArrayList<String> shiftDetails; // Store displayable shift details
+    private ArrayList<Shift> shiftList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_swaps);
 
-        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
+        shiftsRecyclerView = findViewById(R.id.shifts_recycler_view);
+        shiftsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize UI elements
-        shiftsSpinner = findViewById(R.id.shifts_spinner);
-        coveringStudentEmail = findViewById(R.id.covering_student_email);
-        submitSwapRequestButton = findViewById(R.id.submit_swap_request_button);
-
-        // Load shifts for the current day or the user's shifts
         loadShifts();
-
-        // Set onClick listener for the button
-        submitSwapRequestButton.setOnClickListener(v -> submitSwapRequest());
     }
 
     private void loadShifts() {
-        String currentDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().getTime());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail(); // Replace with actual email from Firebase Auth
 
-        // Replace this with actual user authentication to get the student's email
-        String currentStudentEmail = "rutwik@gmail.com"; // Replace with actual email from Firebase Auth
-
-        // Fetch shifts for the current student from Firestore
         db.collection("shifts")
-                .whereEqualTo("studentClockInId", currentStudentEmail) // Assuming each shift has an associated student email
+                .whereEqualTo("studentClockInId", userEmail)
+                .whereEqualTo("requestedSwap", false)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         shiftList = new ArrayList<>();
-                        shiftDetails = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            String shiftId = document.getId();
-                            String startTime = document.getString("startTime");
-                            String endTime = document.getString("endTime");
-                            String location = document.getString("location");
-                            String shiftDetail = "Shift ID: " + shiftId + " | Start: " + startTime + " | End: " + endTime + " | Location: " + location;
-
-                            shiftList.add(shiftId);
-                            shiftDetails.add(shiftDetail);
+                            Shift shift = new Shift(
+                                    document.getId(),
+                                    document.getString("studentClockInId"),
+                                    document.getString("startTime"),
+                                    document.getString("endTime"),
+                                    document.getString("location"),
+                                    document.getString("workRole"),
+                                    document.getString("date"),
+                                    document.getString("weekId"),
+                                    document.getLong("duration").intValue()
+                            );
+                            shiftList.add(shift);
                         }
-                        setupShiftSpinner();
+                        ShiftsAdapter adapter = new ShiftsAdapter(shiftList, "rutwik@gmail.com");
+                        shiftsRecyclerView.setAdapter(adapter);
                     } else {
                         Toast.makeText(this, "Failed to load shifts", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void setupShiftSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, shiftDetails);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        shiftsSpinner.setAdapter(adapter);
-    }
+    private class ShiftsAdapter extends RecyclerView.Adapter<ShiftsAdapter.ShiftViewHolder> {
 
-    private void submitSwapRequest() {
-        if (shiftsSpinner.getSelectedItem() == null) {
-            Toast.makeText(this, "Please select a shift.", Toast.LENGTH_SHORT).show();
-            return;
+        private ArrayList<Shift> shiftList;
+        private String requestedStudentEmail;
+
+        public ShiftsAdapter(ArrayList<Shift> shiftList, String requestedStudentEmail) {
+            this.shiftList = shiftList;
+            this.requestedStudentEmail = requestedStudentEmail;
         }
 
-        String selectedShiftId = shiftList.get(shiftsSpinner.getSelectedItemPosition());
-        String coveringEmail = coveringStudentEmail.getText().toString().trim();
-        String requestedStudentEmail = "currentStudentEmail@example.com"; // Replace with actual student's email
+        @NonNull
+        @Override
+        public ShiftViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = getLayoutInflater().inflate(R.layout.item_shift, parent, false);
+            return new ShiftViewHolder(view);
+        }
 
-        // Prepare the swap request data
-        SwapRequest swapRequest = new SwapRequest(selectedShiftId, requestedStudentEmail, coveringEmail,
-                "Pending", "Open", System.currentTimeMillis(), "start_time", "end_time", "duration", "date", "location");
+        @Override
+        public void onBindViewHolder(@NonNull ShiftViewHolder holder, int position) {
+            Shift shift = shiftList.get(position);
+            String shiftDetail = "Start: " + shift.startTime + " | End: " + shift.endTime + " | Location: " + shift.location + " | Role: " + shift.workRole;
+            holder.shiftDetailsTextView.setText(shiftDetail);
 
-        // Save to Firestore
+            holder.requestSwapButton.setOnClickListener(v -> {
+                String coveringEmail = holder.coveringStudentEmail.getText().toString().trim();
+                submitSwapRequest(shift, coveringEmail);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return shiftList.size();
+        }
+
+        public class ShiftViewHolder extends RecyclerView.ViewHolder {
+            TextView shiftDetailsTextView;
+            EditText coveringStudentEmail;
+            Button requestSwapButton;
+
+            public ShiftViewHolder(@NonNull View itemView) {
+                super(itemView);
+                shiftDetailsTextView = itemView.findViewById(R.id.shift_details);
+                coveringStudentEmail = itemView.findViewById(R.id.covering_student_email);
+                requestSwapButton = itemView.findViewById(R.id.request_swap_button);
+            }
+        }
+    }
+
+    private void submitSwapRequest(Shift shift, String coveringEmail) {
+        String shiftStatus = coveringEmail.isEmpty() ? "Open" : "Close";
+        String swapStatus = "Pending";
+
+        SwapRequest swapRequest = new SwapRequest(
+                shift.shiftId,
+                shift.studentClockInId,
+                coveringEmail,
+                swapStatus,
+                shiftStatus,
+                System.currentTimeMillis(),
+                shift.startTime,
+                shift.endTime,
+                String.valueOf(shift.duration),
+                shift.date,
+                shift.location
+        );
+
         db.collection("swap_requests")
                 .add(swapRequest)
                 .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "Swap request submitted successfully", Toast.LENGTH_SHORT).show();
-                    coveringStudentEmail.setText(""); // Clear the email field
+                    db.collection("shifts")
+                            .document(shift.shiftId)
+                            .update("requestedSwap", true)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(RequestSwapsActivity.this, "Swap request submitted", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(RequestSwapsActivity.this, RequestSwapsActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(RequestSwapsActivity.this, "Swap request added but failed to update shift: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+//                    Toast.makeText(RequestSwapsActivity.this, "Swap request submitted successfully", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("FirestoreError", "Error submitting swap request: " + e.getMessage());
-                    Toast.makeText(this, "Error submitting swap request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RequestSwapsActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
+    public static class SwapRequest {
+        public String shiftId;
+        public String requestedStudentEmail;
+        public String coveringStudentEmail;
+        public String swapStatus;
+        public String shiftStatus;
+        public long requestTimestamp;
+        public String startTime;
+        public String endTime;
+        public String duration;
+        public String date;
+        public String location;
 
+        public SwapRequest() {}
 
-
-    // SwapRequest class to model the request
-    public class SwapRequest {
-        public String shiftId; // Shift ID
-        public String requestedStudentEmail; // Requesting student's email
-        public String coveringStudentEmail; // Covering student's email
-        public String swapStatus; // Swap status (Accepted/Denied/Pending)
-        public String shiftStatus; // Shift status (Open/Closed)
-        public long requestedOn; // DateTime when the request is made
-        public String startTime; // Shift start time
-        public String endTime; // Shift end time
-        public String duration; // Duration of the shift
-        public String date; // Date of the shift
-        public String location; // Location of the shift
-
-        // Default constructor required for Firestore serialization
-        public SwapRequest() {
-        }
-
-        // Constructor to create SwapRequest object
         public SwapRequest(String shiftId, String requestedStudentEmail, String coveringStudentEmail,
-                           String swapStatus, String shiftStatus, long requestedOn,
-                           String startTime, String endTime, String duration, String date, String location) {
+                           String swapStatus, String shiftStatus, long requestTimestamp,
+                           String startTime, String endTime, String duration,
+                           String date, String location) {
             this.shiftId = shiftId;
             this.requestedStudentEmail = requestedStudentEmail;
             this.coveringStudentEmail = coveringStudentEmail;
             this.swapStatus = swapStatus;
             this.shiftStatus = shiftStatus;
-            this.requestedOn = requestedOn;
+            this.requestTimestamp = requestTimestamp;
             this.startTime = startTime;
             this.endTime = endTime;
             this.duration = duration;
             this.date = date;
             this.location = location;
         }
-    }}
+    }
 
+    public static class Shift {
+        public String shiftId;
+        public String studentClockInId;
+        public String startTime;
+        public String endTime;
+        public String location;
+        public String workRole;
+        public String date;
+        public String weekId;
+        public int duration;
+
+        public Shift() {}
+
+        public Shift(String shiftId, String studentClockInId, String startTime, String endTime,
+                     String location, String workRole, String date, String weekId, int duration) {
+            this.shiftId = shiftId;
+            this.studentClockInId = studentClockInId;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.location = location;
+            this.workRole = workRole;
+            this.date = date;
+            this.weekId = weekId;
+            this.duration = duration;
+        }
+    }
+}

@@ -19,7 +19,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class DiningManagerActivity extends AppCompatActivity {
 
     private TextView emailTextView;
-    private TextView clockInIdTextView;
+    private TextView studentIdTextView; // Assuming you have a student ID to display
+    private TextView nameTextView;
+    private TextView phoneTextView;
+    private TextView ssnTextView;
     private FirebaseFirestore db;
 
     @Override
@@ -28,7 +31,11 @@ public class DiningManagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dining_manager);
 
         emailTextView = findViewById(R.id.email_text_view);
-        clockInIdTextView = findViewById(R.id.clockin_id_text_view);
+        studentIdTextView = findViewById(R.id.student_id_text_view); // Assuming you want to display this
+        nameTextView = findViewById(R.id.name);
+        phoneTextView = findViewById(R.id.phone);
+        ssnTextView = findViewById(R.id.ssn);
+        studentIdTextView = findViewById(R.id.student_id_text_view);
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -73,11 +80,15 @@ public class DiningManagerActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 String email = document.getString("email");
-                                String clockInId = document.getString("clockinId");
-
-                                // Update the UI with the retrieved data
-                                emailTextView.setText(email);
-                                clockInIdTextView.setText(clockInId);
+                                String studentId = document.getString("clockinId"); // Assuming this exists
+                                String phone = document.getString("phone");
+                                String ssn = document.getString("ssn");
+                                String name = document.getString("name");
+                                emailTextView.setText("Email: "+email);
+                                studentIdTextView.setText("ClockIn ID: " + studentId);
+                                nameTextView.setText("Name: " + name);
+                                phoneTextView.setText("Phone Number: " + phone);
+                                ssnTextView.setText("SSN: " + ssn);
                             } else {
                                 Toast.makeText(DiningManagerActivity.this, "No such user data found.", Toast.LENGTH_SHORT).show();
                             }

@@ -62,4 +62,17 @@
         android:textSize="16sp"
         android:layout_marginTop="16dp"/>
 
+    <TextView
+        android:id="@+id/reset_password_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset Password"
+        android:textColor="@android:color/holo_blue_light"
+        android:layout_below="@id/sign_up_link"
+        android:layout_centerHorizontal="true"
+        android:padding="12dp"
+        android:clickable="true"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"/>
+
 </RelativeLayout>

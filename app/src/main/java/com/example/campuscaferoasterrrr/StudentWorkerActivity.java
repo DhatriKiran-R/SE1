@@ -20,6 +20,9 @@ public class StudentWorkerActivity extends AppCompatActivity {
 
     private TextView emailTextView;
     private TextView studentIdTextView; // Assuming you have a student ID to display
+    private TextView nameTextView;
+    private TextView phoneTextView;
+    private TextView ssnTextView;
     private FirebaseFirestore db;
 
     @Override
@@ -29,7 +32,10 @@ public class StudentWorkerActivity extends AppCompatActivity {
 
         emailTextView = findViewById(R.id.email_text_view);
         studentIdTextView = findViewById(R.id.student_id_text_view); // Assuming you want to display this
-
+        nameTextView = findViewById(R.id.name);
+        phoneTextView = findViewById(R.id.phone);
+        ssnTextView = findViewById(R.id.ssn);
+        studentIdTextView = findViewById(R.id.student_id_text_view);
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
@@ -71,11 +77,17 @@ public class StudentWorkerActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 String email = document.getString("email");
-                                String studentId = document.getString("studentId"); // Assuming this exists
+                                String studentId = document.getString("clockinId"); // Assuming this exists
+                                String phone = document.getString("phone");
+                                String ssn = document.getString("ssn");
+                                String name = document.getString("name");
 
                                 // Update the UI with the retrieved data
-                                emailTextView.setText(email);
-                                studentIdTextView.setText("Student ID: " + studentId);
+                                emailTextView.setText("Email: "+email);
+                                studentIdTextView.setText("ClockIn ID: " + studentId);
+                                nameTextView.setText("Name: " + name);
+                                phoneTextView.setText("Phone Number: " + phone);
+                                ssnTextView.setText("SSN: " + ssn);
                             } else {
                                 Toast.makeText(StudentWorkerActivity.this, "No such user data found.", Toast.LENGTH_SHORT).show();
                             }

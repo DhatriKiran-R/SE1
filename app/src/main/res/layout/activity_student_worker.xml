@@ -6,10 +6,53 @@
 
     <!-- TextView for displaying email -->
     <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name: "
+
+        android:textSize="18sp"
+        android:layout_margin="16dp" />
+    <TextView
+        android:id="@+id/phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phone Number: "
+        android:textSize="18sp"
+        android:layout_below="@id/student_id_text_view"
+        android:layout_margin="16dp" />
+    <TextView
+        android:id="@+id/ssn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SSN: "
+        android:textSize="18sp"
+        android:layout_below="@id/phone"
+        android:layout_margin="16dp" />
+    <TextView
         android:id="@+id/email_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email: "
+        android:layout_below="@id/name"
+        android:textSize="18sp"
+        android:layout_margin="16dp" />
+
+    <TextView
+        android:id="@+id/weekly_work_limit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Weekly Work Limit: 20 hours"
+        android:layout_below="@id/ssn"
+        android:textSize="18sp"
+        android:layout_margin="16dp" />
+
+    <TextView
+        android:id="@+id/pay_per_hour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pay per hour: $8"
+        android:layout_below="@id/weekly_work_limit"
         android:textSize="18sp"
         android:layout_margin="16dp" />
 
@@ -18,7 +61,7 @@
         android:id="@+id/student_id_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Student ID: "
+        android:text="ClockIn ID: "
         android:textSize="18sp"
         android:layout_below="@id/email_text_view"
         android:layout_margin="16dp" />

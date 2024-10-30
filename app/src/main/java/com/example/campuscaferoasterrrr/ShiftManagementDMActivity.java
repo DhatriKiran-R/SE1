@@ -270,6 +270,7 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
                             shiftData.put("weekId", weekId); // Add the week ID
                             shiftData.put("shiftId", generateShiftId()); // Generate a unique shift ID
                             shiftData.put("date", startTime.substring(0, 10));
+                            shiftData.put("requestedSwap", false);
                             // Insert the shift data into Firestore
                             db.collection("shifts").add(shiftData)
                                     .addOnSuccessListener(documentReference -> {
