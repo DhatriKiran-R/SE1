@@ -45,6 +45,9 @@
             android:name=".StudentWorkerActivity"
             android:exported="false"/>
         <activity
+            android:name=".ViewSwapRequestsSW"
+            android:exported="false"/>
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
