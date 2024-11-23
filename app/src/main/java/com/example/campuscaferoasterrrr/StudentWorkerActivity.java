@@ -19,11 +19,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class StudentWorkerActivity extends AppCompatActivity {
 
     private TextView emailTextView;
-    private TextView studentIdTextView; // Assuming you have a student ID to display
+    private TextView studentIdTextView;
     private TextView nameTextView;
     private TextView phoneTextView;
     private TextView ssnTextView;
     private FirebaseFirestore db;
+    private boolean isSSNVisible = false; // Tracks SSN visibility
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,17 +32,47 @@ public class StudentWorkerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_student_worker);
 
         emailTextView = findViewById(R.id.email_text_view);
-        studentIdTextView = findViewById(R.id.student_id_text_view); // Assuming you want to display this
+        studentIdTextView = findViewById(R.id.student_id_text_view);
         nameTextView = findViewById(R.id.name);
         phoneTextView = findViewById(R.id.phone);
         ssnTextView = findViewById(R.id.ssn);
-        studentIdTextView = findViewById(R.id.student_id_text_view);
+
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
         // Retrieve user data
         retrieveUserData();
 
+        // Set click listener for SSN TextView
+        ssnTextView.setOnClickListener(view -> {
+            if (isSSNVisible) {
+                // Hide SSN
+                ssnTextView.setText("***-**-****");
+            } else {
+                // Fetch the full SSN from the database if needed
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) {
+                    db.collection("users").document(user.getUid())
+                            .get()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful() && task.getResult() != null) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        String ssn = document.getString("ssn");
+                                        ssnTextView.setText(ssn);
+                                    } else {
+                                        Toast.makeText(this, "SSN not found.", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(this, "Failed to retrieve SSN.", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+            }
+            isSSNVisible = !isSSNVisible; // Toggle visibility state
+        });
+
+        // Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_200));
 
@@ -53,6 +84,8 @@ public class StudentWorkerActivity extends AppCompatActivity {
                 intent = new Intent(StudentWorkerActivity.this, ViewSwapRequestsSW.class);
             } else if (item.getItemId() == R.id.nav_calendar) {
                 intent = new Intent(StudentWorkerActivity.this, CalendarSWActivity.class);
+            } else if (item.getItemId() == R.id.nav_profile) {
+                intent = new Intent(StudentWorkerActivity.this, StudentWorkerActivity.class);
             } else if (item.getItemId() == R.id.nav_logout) {
                 FirebaseAuth.getInstance().signOut();
                 intent = new Intent(StudentWorkerActivity.this, LoginActivity.class);
@@ -77,17 +110,18 @@ public class StudentWorkerActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 String email = document.getString("email");
-                                String studentId = document.getString("clockinId"); // Assuming this exists
+                                String studentId = document.getString("clockinId");
                                 String phone = document.getString("phone");
-                                String ssn = document.getString("ssn");
                                 String name = document.getString("name");
 
                                 // Update the UI with the retrieved data
-                                emailTextView.setText("Email: "+email);
-                                studentIdTextView.setText("ClockIn ID: " + studentId);
-                                nameTextView.setText("Name: " + name);
-                                phoneTextView.setText("Phone Number: " + phone);
-                                ssnTextView.setText("SSN: " + ssn);
+                                emailTextView.setText(email);
+                                studentIdTextView.setText(studentId);
+                                nameTextView.setText(name);
+                                phoneTextView.setText(phone);
+
+                                // Set SSN initially hidden
+                                ssnTextView.setText("***-**-****");
                             } else {
                                 Toast.makeText(StudentWorkerActivity.this, "No such user data found.", Toast.LENGTH_SHORT).show();
                             }

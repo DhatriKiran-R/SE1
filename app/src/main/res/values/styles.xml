@@ -8,4 +8,8 @@
     <style name="CustomBottomNavigationView" parent="Widget.Design.BottomNavigationView">
         <item name="android:background">@color/menuBackgroundColor</item> <!-- Background color -->
     </style>
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

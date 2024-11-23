@@ -1,18 +1,13 @@
 package com.example.campuscaferoasterrrr;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.*;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -20,10 +15,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,11 +39,13 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
     private Button submitButton;
     private String startTime, endTime;
     private Calendar startTimeCalendar, endTimeCalendar;
+
+    private HashMap<String, String> studentEmails = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shift_management_dmactivity);
-
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -78,7 +78,7 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
 
         submitButton.setOnClickListener(v -> submitShift());
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_200));
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
@@ -91,19 +91,49 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
                 intent = new Intent(ShiftManagementDMActivity.this, StudentTrackingDMActivity.class);
             } else if (item.getItemId() == R.id.nav_calendar) {
                 intent = new Intent(ShiftManagementDMActivity.this, CalendarDMActivity.class);
+            } else if (item.getItemId() == R.id.nav_account) {
+                // Show the submenu when Account item is clicked
+                showAccountMenu();
+                return true; // prevent going to next activity
             } else if (item.getItemId() == R.id.nav_logout) {
-                FirebaseAuth.getInstance().signOut();
+                // Handle logout directly
+                mAuth.signOut();
                 intent = new Intent(ShiftManagementDMActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();
-                return true; // Exit the listener for logout
+                return true;
             } else {
-                return false; // Return false for unhandled items
+                return false; // For other items, return false
             }
             startActivity(intent);
             return true; // Return true to indicate the item was handled
         });
     }
+    private void showAccountMenu() {
+        View view = findViewById(R.id.nav_account); // This view is where the menu will be attached
+        PopupMenu popupMenu = new PopupMenu(ShiftManagementDMActivity.this, view);
+        getMenuInflater().inflate(R.menu.account_menu, popupMenu.getMenu());
+
+        // Set click listeners for the submenu items (Profile and Logout)
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.nav_profile) {
+                // Handle profile option
+                Intent intent = new Intent(ShiftManagementDMActivity.this, DiningManagerActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (menuItem.getItemId() == R.id.nav_logout) {
+                // Handle logout option
+                FirebaseAuth.getInstance().signOut();
+                Intent logoutIntent = new Intent(ShiftManagementDMActivity.this, LoginActivity.class);
+                startActivity(logoutIntent);
+                finish();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show(); // Show the submenu
+    }
+
     private void showDateTimePicker(Calendar calendar, TextView textView) {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -138,31 +168,78 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        ArrayList<String> students = new ArrayList<>();
+                        ArrayList<String> students = new ArrayList<>(); // Map to store names and emails
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            String studentEmail = document.getString("email"); // Change here to get the email
+                            String studentEmail = document.getString("email"); // Get the email
                             if (studentEmail != null) {
-                                students.add(studentEmail);
+                                db.collection("users")
+                                        .whereEqualTo("email", studentEmail) // Get the user by email
+                                        .get()
+                                        .addOnCompleteListener(userTask -> {
+                                            if (userTask.isSuccessful() && !userTask.getResult().isEmpty()) {
+                                                // Get the student name
+                                                String studentName = userTask.getResult().getDocuments().get(0).getString("name");
+
+                                                // Ensure the name is not null, if it is, add "Unknown"
+                                                if (studentName != null) {
+                                                    students.add(studentName);
+                                                    studentEmails.put(studentName, studentEmail); // Store name and email
+                                                } else {
+                                                    students.add("Unknown");
+                                                    studentEmails.put("Unknown", studentEmail);
+                                                }
+
+                                                // Update the spinner adapter only after all data is fetched
+                                                if (students.size() == task.getResult().size()) {
+                                                    updateSpinner(students);
+                                                }
+                                            } else {
+                                                // If no name found, add "Unknown"
+                                                students.add("Unknown");
+                                                studentEmails.put("Unknown", studentEmail);
+
+                                                // Update the spinner adapter
+                                                if (students.size() == task.getResult().size()) {
+                                                    updateSpinner(students);
+                                                }
+                                            }
+                                        });
                             }
                         }
-                        Log.d("ShiftManagementDM", "Fetched students: " + students);
-                        if (students.isEmpty()) {
-                            Toast.makeText(this, "No students found.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        ArrayAdapter<String> studentAdapter = new ArrayAdapter<>(this,
-                                android.R.layout.simple_spinner_item, students);
-                        studentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        studentSpinner.setAdapter(studentAdapter);
                     } else {
                         Toast.makeText(this, "Failed to fetch students.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+
+    private void updateSpinner(ArrayList<String> students) {
+        Log.d("ShiftManagementDM", "Fetched students: " + students);
+        if (students.isEmpty()) {
+            Toast.makeText(this, "No students found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ArrayAdapter<String> studentAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, students);
+        studentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        studentSpinner.setAdapter(studentAdapter);
+    }
+
+
+
+
     private void submitShift() {
         String selectedRole = roleSpinner.getSelectedItem().toString();
-        String selectedStudentClockInId = studentSpinner.getSelectedItem().toString(); // Replace with actual clockInId
+        String selectedStudentName = studentSpinner.getSelectedItem().toString(); // Get the selected student name
+
+        // Fetch the email for the selected student from the map
+        String selectedStudentClockInId = studentEmails.get(selectedStudentName); // Get the email corresponding to the selected student
+
+        if (selectedStudentClockInId == null) {
+            Toast.makeText(this, "Please select a student.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         int selectedLocationId = locationRadioGroup.getCheckedRadioButtonId();
         RadioButton selectedLocationButton = findViewById(selectedLocationId);
         String selectedLocation = selectedLocationButton.getText().toString();
@@ -175,6 +252,7 @@ public class ShiftManagementDMActivity extends AppCompatActivity {
         // Check for overlapping shifts
         checkForOverlappingShifts(selectedStudentClockInId, startTime, endTime, selectedRole, selectedLocation);
     }
+
 
     private void checkForOverlappingShifts(String studentClockInId, String newStartTime, String newEndTime, String role, String location) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();

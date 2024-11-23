@@ -9,50 +9,57 @@
 
     <Spinner
         android:id="@+id/work_role_spinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="150dp"
+        android:layout_height="31dp"
+        android:layout_margin="16dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"/>
-
+        app:layout_constraintHorizontal_bias="0.111" app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
     <Spinner
         android:id="@+id/location_spinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/work_role_spinner"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="161dp"
+        android:layout_height="33dp"
+        android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"/>
-
+        app:layout_constraintHorizontal_bias="0.879" app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="16dp"/>
     <CalendarView
         android:id="@+id/calendar_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/location_spinner"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="324dp"
+        android:layout_height="308dp"
+        android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/location_spinner"/>
 
     <Button
         android:id="@+id/check_shifts_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="Check Shifts"
-        app:layout_constraintTop_toBottomOf="@+id/calendar_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@+id/calendar_view"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/check_shifts_button"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_margin="16dp">
 
-    <TextView
-        android:id="@+id/shifts_text_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/check_shifts_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp"
-        android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/shifts_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:scrollbars="vertical" />
+    </ScrollView>
+
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

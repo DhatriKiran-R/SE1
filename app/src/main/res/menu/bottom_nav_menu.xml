@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_shift_management"
-        android:title="@string/shift_management" />
+        android:title="Schedule"
+        android:icon="@drawable/ic_shift_management" />
+
     <item
         android:id="@+id/nav_swap_requests"
-        android:title="@string/swap_requests" />
+        android:title="Swaps"
+        android:icon="@drawable/ic_swap_requests" />
+
     <item
         android:id="@+id/nav_student_tracking"
-        android:title="@string/student_tracking" />
+        android:title="Timesheet"
+        android:icon="@drawable/ic_student_tracking" />
+
     <item
         android:id="@+id/nav_calendar"
-        android:title="@string/calendar" />
+        android:title="@string/calendar"
+        android:icon="@drawable/ic_calendar" />
+
     <item
-        android:id="@+id/nav_logout"
-        android:title="@string/logout" />
+        android:id="@+id/nav_account"
+        android:title="Account"
+        android:icon="@drawable/ic_menu" />
+
 </menu>

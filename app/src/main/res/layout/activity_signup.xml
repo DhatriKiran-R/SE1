@@ -1,101 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/white"
-    tools:context=".SignupActivity">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/main"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="24dp"
+                android:background="@color/white"
+                tools:context=".SignupActivity">
+
+    <!-- App Logo/Image (matching login screen) -->
+<!--    <ImageView-->
+<!--        android:id="@+id/app_logo"-->
+<!--        android:layout_width="120dp"-->
+<!--        android:layout_height="120dp"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:layout_marginTop="48dp"-->
+<!--        android:layout_marginBottom="32dp"-->
+<!--        android:src="@mipmap/ic_launcher"-->
+<!--        android:contentDescription="App Logo"/>-->
 
     <TextView
         android:id="@+id/signup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/app_logo"
         android:text="@string/sign_up_text"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:textColor="@color/black"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="32dp" />
 
-    <EditText
-        android:id="@+id/name"
+    <!-- Name Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/name_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name"
-        android:inputType="text"
         android:layout_below="@id/signup_title"
-        android:layout_marginBottom="24dp"
-        android:padding="12dp"/>
-
-    <EditText
-        android:id="@+id/email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/email"
-        android:inputType="textEmailAddress"
-        android:layout_below="@id/name"
         android:layout_marginBottom="16dp"
-        android:padding="12dp" />
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/password"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:inputType="textPersonName"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Email Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/email_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:layout_below="@id/email"
+        android:layout_below="@id/name_layout"
         android:layout_marginBottom="16dp"
-        android:padding="12dp"/>
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <EditText
-        android:id="@+id/clockin_id"
+    <!-- Password Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/password_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/clockin_id"
-    android:inputType="text"
-    android:layout_below="@id/password"
-    android:layout_marginBottom="24dp"
-    android:padding="12dp"/>
+        android:layout_below="@id/email_layout"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        app:passwordToggleEnabled="true"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/phone"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Clock In ID Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/clockin_id_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Phone Number"
-        android:inputType="text"
-        android:layout_below="@id/clockin_id"
+        android:layout_below="@id/password_layout"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/clockin_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/clockin_id"
+            android:inputType="text"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Phone Number Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/phone_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clockin_id_layout"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phone Number"
+            android:inputType="phone"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- SSN Input Layout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ssn_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/phone_layout"
         android:layout_marginBottom="24dp"
-        android:padding="12dp"/>
+        app:boxStrokeColor="@color/purple_500"
+        app:hintTextColor="@color/purple_500"
+        app:passwordToggleEnabled="true"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/ssn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="SSN"
-        android:inputType="text"
-        android:layout_below="@id/phone"
-        android:layout_marginBottom="24dp"
-        android:padding="12dp"/>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/ssn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="SSN"
+            android:inputType="numberPassword"
+            android:padding="16dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <!-- Sign Up Button with elevation and ripple effect -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/signup_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sign_up"
-        android:layout_below="@id/ssn"
-        android:textColor="@android:color/white" />
+        android:layout_below="@id/ssn_layout"
+        android:text="@string/sign_up_text"
+        android:textColor="@android:color/white"
+        android:padding="12dp"
+        android:textSize="16sp"
+        app:cornerRadius="8dp"
+        android:elevation="2dp"
+        app:backgroundTint="@color/purple_500"/>
 
-    <!-- New TextView for login redirection -->
-    <TextView
+    <!-- Login Link with Material styling -->
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/login_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/already_have_account"
-        android:textColor="@android:color/holo_blue_light"
         android:layout_below="@id/signup_button"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"/>
+        android:text="@string/already_have_account"
+        android:textColor="@color/purple_500"
+        android:padding="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"/>
+
 </RelativeLayout>

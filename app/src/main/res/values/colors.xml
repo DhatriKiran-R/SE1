@@ -11,7 +11,6 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="menuBackgroundColor">#2D3B45</color> <!-- Background color -->
-
     <color name="menuSelectedTextColor">#FFFFFF</color> <!-- Replace with desired selected color -->
     <color name="menuTextColor">#CCCCCC</color> <!-- Replace with desired default color -->
 

@@ -1,22 +1,27 @@
 package com.example.campuscaferoasterrrr;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -32,7 +37,7 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_swap_requests_dmactivity);
-
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         // Adjust for edge-to-edge
         View mainView = findViewById(R.id.main); // Ensure you add this ID in the XML
         if (mainView != null) {
@@ -52,6 +57,62 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         fetchSwapRequests();
+
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setBackgroundColor(ContextCompat.getColor(this, R.color.purple_200));
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            Intent intent;
+            if (item.getItemId() == R.id.nav_shift_management) {
+                intent = new Intent(SwapRequestsDMActivity.this, ShiftManagementDMActivity.class);
+            } else if (item.getItemId() == R.id.nav_swap_requests) {
+                intent = new Intent(SwapRequestsDMActivity.this, SwapRequestsDMActivity.class);
+            } else if (item.getItemId() == R.id.nav_student_tracking) {
+                intent = new Intent(SwapRequestsDMActivity.this, StudentTrackingDMActivity.class);
+            } else if (item.getItemId() == R.id.nav_calendar) {
+                intent = new Intent(SwapRequestsDMActivity.this, CalendarDMActivity.class);
+            } else if (item.getItemId() == R.id.nav_account) {
+                // Show the submenu when Account item is clicked
+                showAccountMenu();
+                return true; // prevent going to next activity
+            } else if (item.getItemId() == R.id.nav_logout) {
+                // Handle logout directly
+                mAuth.signOut();
+                intent = new Intent(SwapRequestsDMActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            } else {
+                return false; // For other items, return false
+            }
+            startActivity(intent);
+            return true; // Return true to indicate the item was handled
+        });
+    }
+
+    private void showAccountMenu() {
+        View view = findViewById(R.id.nav_account); // This view is where the menu will be attached
+        PopupMenu popupMenu = new PopupMenu(SwapRequestsDMActivity.this, view);
+        getMenuInflater().inflate(R.menu.account_menu, popupMenu.getMenu());
+
+        // Set click listeners for the submenu items (Profile and Logout)
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.nav_profile) {
+                // Handle profile option
+                Intent intent = new Intent(SwapRequestsDMActivity.this, DiningManagerActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (menuItem.getItemId() == R.id.nav_logout) {
+                // Handle logout option
+                FirebaseAuth.getInstance().signOut();
+                Intent logoutIntent = new Intent(SwapRequestsDMActivity.this, LoginActivity.class);
+                startActivity(logoutIntent);
+                finish();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show(); // Show the submenu
     }
 
     private void fetchSwapRequests() {
@@ -65,14 +126,27 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             SwapRequest request = document.toObject(SwapRequest.class);
                             request.setId(document.getId());
-                            swapRequestsList.add(request);
+
+                            // Fetch names for requested and covering students
+                            fetchStudentName(request.getRequestedStudentEmail(), requestedName -> {
+                                request.setRequestedStudentName(requestedName);
+                                fetchStudentName(request.getCoveringStudentEmail(), coveringName -> {
+                                    request.setCoveringStudentName(coveringName);
+                                    swapRequestsList.add(request);
+
+                                    // Notify adapter after fetching all names
+                                    if (swapRequestsList.size() == task.getResult().size()) {
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                            });
                         }
-                        adapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(this, "Failed to fetch swap requests", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
 
     private void handleSwapRequest(SwapRequest request, boolean isApproved) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -140,10 +214,11 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
 
             public void bind(SwapRequest request) {
                 swapRequestDetails.setText(
-                        "Request by: " + request.getRequestedStudentEmail() +
-                                "\nCovering: " + request.getCoveringStudentEmail() +
+                        "Requested by: " + request.getRequestedStudentName() + " (" + request.getRequestedStudentEmail() + ")" +
+                                "\nCovering: " + request.getCoveringStudentName() + " (" + request.getCoveringStudentEmail() + ")" +
                                 "\nDate: " + request.getDate() +
-                                "\nTime: " + request.getStartTime() + " - " + request.getEndTime()
+                                "\nTime: " + request.getStartTime().substring(11) + " - " + request.getEndTime().substring(11) +
+                                "\nCovering Student Work Hours: " + request.getTotalWorkHours()
                 );
 
                 approveButton.setOnClickListener(v -> handleSwapRequest(request, true));
@@ -151,6 +226,26 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void fetchStudentName(String email, FirestoreCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String name = task.getResult().getDocuments().get(0).getString("name");
+                        callback.onCallback(name);
+                    } else {
+                        callback.onCallback("Unknown"); // Default if no name is found
+                    }
+                });
+    }
+
+    private interface FirestoreCallback {
+        void onCallback(String name);
+    }
+
 
     private static class SwapRequest {
         private String id;
@@ -163,16 +258,27 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
         private String location;
         private String swapStatus;
 
+        private Long totalWorkHours;
+        private String requestedStudentName; // New field
+        private String coveringStudentName;
+
         // Empty constructor for Firestore
         public SwapRequest() {}
 
         // Getters and setters
         public String getId() { return id; }
+        public String getRequestedStudentName() { return requestedStudentName; }
+        public void setRequestedStudentName(String requestedStudentName) { this.requestedStudentName = requestedStudentName; }
+        public String getCoveringStudentName() { return coveringStudentName; }
+        public void setCoveringStudentName(String coveringStudentName) { this.coveringStudentName = coveringStudentName; }
         public void setId(String id) { this.id = id; }
         public String getCoveringStudentEmail() { return coveringStudentEmail; }
         public void setCoveringStudentEmail(String coveringStudentEmail) { this.coveringStudentEmail = coveringStudentEmail; }
         public String getRequestedStudentEmail() { return requestedStudentEmail; }
         public void setRequestedStudentEmail(String requestedStudentEmail) { this.requestedStudentEmail = requestedStudentEmail; }
+
+        public Long getTotalWorkHours() { return totalWorkHours; }
+        public void setTotalWorkHours(Long totalWorkHours) { this.totalWorkHours = totalWorkHours; }
         public String getShiftId() { return shiftId; }
         public void setShiftId(String shiftId) { this.shiftId = shiftId; }
         public String getDate() { return date; }

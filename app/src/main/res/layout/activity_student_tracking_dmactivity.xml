@@ -5,11 +5,18 @@
                                                    android:id="@+id/main"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
-                                                   tools:context=".ShiftManagementDMActivity">
+                                                   tools:context=".StudentTrackingDMActivity">
 
-    <!-- Other UI elements can be added here -->
+    <!-- RecyclerView to display shift data -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/student_tracking_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="0dp"
