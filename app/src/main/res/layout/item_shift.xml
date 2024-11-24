@@ -21,7 +21,7 @@
             android:id="@+id/covering_student_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter covering student's email"
+            android:hint="Enter covering student's email (Optional)"
             android:layout_marginTop="8dp"/>
 
         <Button

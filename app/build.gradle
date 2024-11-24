@@ -74,4 +74,7 @@ dependencies {
     debugImplementation libs.androidx.ui.test.manifest
     implementation 'com.google.firebase:firebase-auth:21.1.0'
     implementation 'com.google.firebase:firebase-firestore:24.7.0'
+    implementation 'com.google.firebase:firebase-messaging:23.2.1' // Latest version
+
+
 }

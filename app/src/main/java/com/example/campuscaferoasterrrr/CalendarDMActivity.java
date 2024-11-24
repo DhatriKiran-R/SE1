@@ -1,6 +1,7 @@
 package com.example.campuscaferoasterrrr;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -24,24 +25,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CalendarDMActivity extends AppCompatActivity {
 
-    private CalendarView calendarView;
+    private Button datePickerButton, checkShiftsButton;
     private Spinner workRoleSpinner, locationSpinner;
-    private Button checkShiftsButton;
     private TextView shiftsTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar_dmactivity);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
         // Initialize UI elements
-        calendarView = findViewById(R.id.calendar_view);
+        datePickerButton = findViewById(R.id.date_picker_button);
         workRoleSpinner = findViewById(R.id.work_role_spinner);
         locationSpinner = findViewById(R.id.location_spinner);
         checkShiftsButton = findViewById(R.id.check_shifts_button);
         shiftsTextView = findViewById(R.id.shifts_text_view);
 
-        // Populate spinners (you should replace these with your actual data)
+        // Populate spinners
         ArrayAdapter<CharSequence> roleAdapter = ArrayAdapter.createFromResource(this,
                 R.array.roles_array, android.R.layout.simple_spinner_item);
         roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -55,15 +57,28 @@ public class CalendarDMActivity extends AppCompatActivity {
         // Set default date to today's date initially
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        AtomicReference<String> selectedDate = new AtomicReference<>(sdf.format(calendar.getTime()));  // Set current date as default
-        System.out.println("Initial Selected Date (default): " + selectedDate);
+        AtomicReference<String> selectedDate = new AtomicReference<>(sdf.format(calendar.getTime()));
+        datePickerButton.setText("Selected Date: " + selectedDate.get());
 
-        // Attach a listener to capture date selection from CalendarView
-        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            Calendar selectedCalendar = Calendar.getInstance();
-            selectedCalendar.set(year, month, dayOfMonth);  // Set the selected date
-            selectedDate.set(sdf.format(selectedCalendar.getTime()));  // Update the selected date
-            System.out.println("Selected Date: " + selectedDate);  // Debugging
+        // Handle button click to show DatePickerDialog
+        datePickerButton.setOnClickListener(v -> {
+            Calendar currentDate = Calendar.getInstance();
+            int year = currentDate.get(Calendar.YEAR);
+            int month = currentDate.get(Calendar.MONTH);
+            int day = currentDate.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this,
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        Calendar pickedDate = Calendar.getInstance();
+                        pickedDate.set(selectedYear, selectedMonth, selectedDay);
+                        selectedDate.set(sdf.format(pickedDate.getTime()));
+                        datePickerButton.setText("Selected Date: " + selectedDate.get());
+                    },
+                    year, month, day
+            );
+
+            datePickerDialog.show();
         });
 
         // When the "Check Shifts" button is clicked
@@ -233,16 +248,18 @@ public class CalendarDMActivity extends AppCompatActivity {
                             builder.append("Duration: ").append(entry.getValue()).append(" hours\n");
                             break;
                         case "endTime":
-                            builder.append("End Time: ").append(entry.getValue()).append("\n");
+                            builder.append("End Time: ").append(((String) entry.getValue()).substring(11)).append("\n");
                             break;
                         case "location":
                             builder.append("Location: ").append(entry.getValue()).append("\n");
                             break;
-                        case "requestedSwap":
-                            builder.append("Requested Swap: ").append(entry.getValue()).append("\n");
-                            break;
+//                        case "requestedSwap":
+//                            builder.append("Requested Swap: ").append(entry.getValue()).append("\n");
+//                            break;
                         case "startTime":
-                            builder.append("Start Time: ").append(entry.getValue()).append("\n");
+                            builder.append("Start Time: ").append(((String) entry.getValue()).substring(11)).append("\n");
+
+
                             break;
                         case "studentClockInId":
                             builder.append("Student Email: ").append(entry.getValue()).append("\n");
@@ -253,9 +270,9 @@ public class CalendarDMActivity extends AppCompatActivity {
                         case "studentName":
                             builder.append("Student Name: ").append(entry.getValue()).append("\n");
                             break;
-                        default:
-                            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
-                            break;
+//                        default:
+//                            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+//                            break;
                     }
                 }
                 builder.append("\n"); // Separate each shift with a blank line

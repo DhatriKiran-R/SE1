@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.campuscaferoasterrrr.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ViewSwapRequestsSW extends AppCompatActivity {
 
@@ -86,22 +89,24 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
                         openSwapRequests.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             SwapRequest request = document.toObject(SwapRequest.class);
-                            System.out.println(document);
+
                             request.setId(document.getId());
-                            if (userEmail != request.getRequestedStudentEmail()) {
+                            System.out.println(request.getRequestedStudentEmail());
+                            System.out.println(userEmail);
+                            if (!Objects.equals(userEmail, request.getRequestedStudentEmail())) {
 
-                            fetchStudentDetails(request.getRequestedStudentEmail(), (name, workRole) -> {
-                                request.setRequestedStudentName(name);
-                                request.setRequestedStudentRole(workRole);
+                                fetchStudentDetails(request.getRequestedStudentEmail(), (name, workRole) -> {
+                                    request.setRequestedStudentName(name);
+                                    request.setRequestedStudentRole(workRole);
 
-                                openSwapRequests.add(request);
+                                    openSwapRequests.add(request);
 
-                                // Notify adapter after all details are fetched
-                                if (openSwapRequests.size() == task.getResult().size()) {
-                                    adapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
+                                    // Notify adapter after all details are fetched
+                                    if (openSwapRequests.size() == task.getResult().size()) {
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
                         }
                     } else {
                         Toast.makeText(this, "Failed to fetch open swap requests", Toast.LENGTH_SHORT).show();
@@ -132,7 +137,7 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
                 checkWeeklyWorkLimit(userEmail, request.getWeekId(), request.getDuration(), (exceededLimit) -> {
                     System.out.println(4);
                     if (exceededLimit) {
-                        Toast.makeText(this, "You have exceeded your weekly work limit.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "You will exceed your weekly work limit.", Toast.LENGTH_SHORT).show();
                     } else {
                         System.out.println(5);
                         // Proceed with claiming the shift if no conflicts or limits
@@ -295,6 +300,7 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
 //                                Toast.makeText(this, "Failed to update shift details", Toast.LENGTH_SHORT).show();
 //                            });
                     Toast.makeText(this, "Shift swap request successfully sent to the dining manager", Toast.LENGTH_SHORT).show();
+                    fetchOpenSwapRequests();
                 })
                 .addOnFailureListener(e -> {
                     // Handle failure for the swap_requests update
@@ -354,31 +360,46 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
         private class ViewHolder extends RecyclerView.ViewHolder {
             private final TextView textView;
             private final Button claimButton;
+            private final LinearLayout container; // New container for proper layout
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                textView = itemView.findViewById(android.R.id.text1);
+
+                // Initialize the container and textView
+                container = new LinearLayout(ViewSwapRequestsSW.this);
+                container.setOrientation(LinearLayout.VERTICAL); // Stack items vertically
+                container.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                ));
+
+                textView = new TextView(ViewSwapRequestsSW.this);
                 claimButton = new Button(ViewSwapRequestsSW.this);
                 claimButton.setText("I'll Cover");
 
-                ((ViewGroup) itemView).addView(claimButton);
+                // Add views to the container
+                container.addView(textView);
+                container.addView(claimButton);
+
+                // Add container to the itemView
+                ((ViewGroup) itemView).addView(container);
             }
 
             public void bind(SwapRequest request) {
                 String startTime = request.getStartTime().substring(11); // Extract time part only
                 String endTime = request.getEndTime().substring(11); // Extract time part only
-
+                System.out.println(request.getRequestedStudentRole());
                 textView.setText(
                         "Request by: " + request.getRequestedStudentName() +
-                                "\nRole: " + request.getRequestedStudentRole() +
                                 "\nLocation: " + request.getLocation() +
+                                "\nDate: " + request.getStartTime().substring(0,11)  +
                                 "\nTime: " + startTime + " - " + endTime
                 );
 
                 claimButton.setOnClickListener(v -> claimShift(request));
             }
-
         }
+
     }
     private void fetchStudentDetails(String email, FirestoreCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -415,7 +436,7 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
         private String shiftStatus;
 
         private String requestedStudentName; // New field
-        private String requestedStudentRole;
+        private String role;
 
         private String weekId;
 
@@ -431,8 +452,8 @@ public class ViewSwapRequestsSW extends AppCompatActivity {
         public void setDuration(int duration) { this.duration = duration; }
         public String getWeekId() { return weekId; }
         public void setWeekId(String weekId) { this.weekId = weekId; }
-        public String getRequestedStudentRole() { return requestedStudentRole; }
-        public void setRequestedStudentRole(String requestedStudentRole) { this.requestedStudentRole = requestedStudentRole; }
+        public String getRequestedStudentRole() { return role; }
+        public void setRequestedStudentRole(String role) { this.role = role; }
 
         public String getId() { return id; }
         public void setId(String id) { this.id = id; }

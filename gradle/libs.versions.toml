@@ -2,6 +2,7 @@
 agp = "8.1.0"
 firebaseAuthVersion = "21.1.0"
 firebaseFirestore = "25.1.0"
+firebaseMessaging = "24.4.0"
 googleMaterial = "1.7.0"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
@@ -23,6 +24,7 @@ materialVersion = "1.6.0"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-auth-v2110 = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebaseMessaging" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

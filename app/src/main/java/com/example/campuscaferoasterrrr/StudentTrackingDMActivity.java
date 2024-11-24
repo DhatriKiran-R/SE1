@@ -22,9 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 // Main Activity for Student Tracking (Dining Manager view)
 public class StudentTrackingDMActivity extends AppCompatActivity {
@@ -119,19 +117,38 @@ public class StudentTrackingDMActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         shiftDataList.clear();
+                        Map<String, ShiftData> studentShiftMap = new HashMap<>();
+
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String studentEmail = document.getString("studentClockInId");
                             String shiftId = document.getString("shiftId");
 
                             // Get the worked hours from the 'duration' field
-                            String workedHours = document.getLong("duration") + " hours/20 hours";
-
+                            long workedHours = document.getLong("duration");
+                            System.out.println(workedHours);
                             // Fetch student name from the "users" collection
                             fetchStudentName(studentEmail, studentName -> {
-                                shiftDataList.add(new ShiftData(studentName, studentEmail, workedHours));
-                                adapter.notifyDataSetChanged();  // Update the RecyclerView
+                                // Check if the student already exists in the map
+                                if (studentShiftMap.containsKey(studentEmail)) {
+                                    // Update the total worked hours for the student
+                                    ShiftData existingData = studentShiftMap.get(studentEmail);
+                                    System.out.println(existingData);
+                                    existingData.setWorkedHours(existingData.getWorkedHours() + workedHours);
+                                } else {
+                                    // Add a new entry for the student
+                                    ShiftData shiftData = new ShiftData(studentName, studentEmail, workedHours);
+                                    studentShiftMap.put(studentEmail, shiftData);
+                                }
+
+                                // Update the shiftDataList and RecyclerView
+
+                                shiftDataList.clear();
+                                shiftDataList.addAll(studentShiftMap.values());
+                                System.out.println(shiftDataList);
+                                adapter.notifyDataSetChanged(); // Refresh the RecyclerView
                             });
                         }
+
                     } else {
                         Toast.makeText(this, "Failed to load shifts", Toast.LENGTH_SHORT).show();
                     }
@@ -172,11 +189,13 @@ public class StudentTrackingDMActivity extends AppCompatActivity {
         private String studentEmail;
         private String totalWorkedHours;
 
+        private long workedHours;
+
         // Constructor
-        public ShiftData(String studentName, String studentEmail, String totalWorkedHours) {
+        public ShiftData(String studentName, String studentEmail, long workedHours) {
             this.studentName = studentName;
             this.studentEmail = studentEmail;
-            this.totalWorkedHours = totalWorkedHours;
+            this.workedHours = workedHours;
         }
 
         // Getters and Setters
@@ -203,6 +222,14 @@ public class StudentTrackingDMActivity extends AppCompatActivity {
         public void setTotalWorkedHours(String totalWorkedHours) {
             this.totalWorkedHours = totalWorkedHours;
         }
+
+        public long getWorkedHours() {
+            return workedHours;
+        }
+
+        public void setWorkedHours(long workedHours) {
+            this.workedHours = workedHours;
+        }
     }
 
     // Adapter for RecyclerView
@@ -225,7 +252,8 @@ public class StudentTrackingDMActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             ShiftData shiftData = shiftDataList.get(position);
             holder.studentNameTextView.setText(shiftData.getStudentName());
-            holder.totalWorkedHoursTextView.setText(shiftData.getTotalWorkedHours());
+            holder.totalWorkedHoursTextView.setText(String.valueOf(shiftData.getWorkedHours()) + " hours/20 hours");
+
         }
 
         @Override

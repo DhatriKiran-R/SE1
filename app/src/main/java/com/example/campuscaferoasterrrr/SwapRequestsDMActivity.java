@@ -3,6 +3,8 @@ package com.example.campuscaferoasterrrr;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +22,18 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SwapRequestsDMActivity extends AppCompatActivity {
 
@@ -90,6 +98,58 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
         });
     }
 
+    private void sendNotification(String recipientUserId, String title, String message) {
+        // Fetch the FCM token of the recipient user from Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        db.collection("users").whereEqualTo("email", recipientUserId)
+//                .get()
+//                .addOnSuccessListener(document -> {
+//                    if (document.exists()) {
+//                        String token = document.getString("fcmToken");
+//                        if (token != null) {
+//                            // Send the notification if token exists
+//                            sendNotificationToUser(token, title, message);
+//                        }
+//                    }
+//                });
+
+        db.collection("users")
+                .whereEqualTo("email", recipientUserId) // Assuming the "users" collection has an "email" field
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful() && !userTask.getResult().isEmpty()) {
+                        // Assuming "name" field exists in the "users" document
+                        String fcmToken = userTask.getResult().getDocuments().get(0).getString("fcmToken");
+
+                        // Add the studentName to the shift document data
+                        sendNotificationToUser(fcmToken, title, message);
+                    }
+
+
+                });
+    }
+
+    private void sendNotificationToUser(String token, String title, String body) {
+        // Prepare the notification data
+        Map<String, String> notificationData = new HashMap<>();
+        notificationData.put("title", title);
+        notificationData.put("body", body);
+
+        // Construct the RemoteMessage
+        RemoteMessage message = new RemoteMessage.Builder(token)
+                .addData("title", title)
+                .addData("body", body)
+                .build();
+
+        // Send the message using FirebaseMessaging and handle success/failure
+        FirebaseMessaging.getInstance().send(message);
+
+    }
+
+
+
+
+
     private void showAccountMenu() {
         View view = findViewById(R.id.nav_account); // This view is where the menu will be attached
         PopupMenu popupMenu = new PopupMenu(SwapRequestsDMActivity.this, view);
@@ -119,6 +179,7 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("swap_requests")
                 .whereEqualTo("swapStatus", "Pending")
+                .whereEqualTo("shiftStatus", "Closed")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -150,8 +211,9 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
 
     private void handleSwapRequest(SwapRequest request, boolean isApproved) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        System.out.println(isApproved);
+
         if (isApproved) {
+            // Approve the swap request
             db.collection("swap_requests")
                     .document(request.getId())
                     .update("swapStatus", "Approved")
@@ -160,20 +222,32 @@ public class SwapRequestsDMActivity extends AppCompatActivity {
                                 .document(request.getShiftId())
                                 .update("studentClockInId", request.getCoveringStudentEmail())
                                 .addOnSuccessListener(aVoid1 -> {
+                                    // Notify both students
+                                    sendNotification(request.getRequestedStudentEmail(), "Swap Request Approved", "Your swap request has been approved.");
+                                    sendNotification(request.getCoveringStudentEmail(), "Swap Request Approved", "You are now covering the shift.");
                                     Toast.makeText(this, "Swap approved", Toast.LENGTH_SHORT).show();
-                                    fetchSwapRequests();
+                                    startActivity(new Intent(this, SwapRequestsDMActivity.class));
+                                    finish(); // Refresh the list
                                 });
                     });
         } else {
+            // Deny the swap request
             db.collection("swap_requests")
                     .document(request.getId())
                     .update("swapStatus", "Denied")
                     .addOnSuccessListener(aVoid -> {
+                        // Notify both students
+                        sendNotification(request.getRequestedStudentEmail(), "Swap Request Denied", "Your swap request has been denied.");
+                        sendNotification(request.getCoveringStudentEmail(), "Swap Request Denied", "The swap request you offered has been denied.");
                         Toast.makeText(this, "Swap denied", Toast.LENGTH_SHORT).show();
-                        fetchSwapRequests();
+                        startActivity(new Intent(this, SwapRequestsDMActivity.class));
+                        finish();  // Refresh the list
                     });
         }
     }
+
+
+
 
     private class SwapRequestsAdapter extends RecyclerView.Adapter<SwapRequestsAdapter.ViewHolder> {
 

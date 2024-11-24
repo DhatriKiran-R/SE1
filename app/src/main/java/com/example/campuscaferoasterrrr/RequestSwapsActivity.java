@@ -286,7 +286,9 @@ public class RequestSwapsActivity extends AppCompatActivity {
                 shift.date,
                 shift.location,
                 totalWorkHours,
-                shift.weekId
+                shift.weekId,
+                shift.workRole
+
         );
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -334,12 +336,14 @@ public class RequestSwapsActivity extends AppCompatActivity {
         public String weekId;
         public int totalWorkHours;
 
+        public String role;
+
         public SwapRequest() {}
 
         public SwapRequest(String shiftId, String requestedStudentEmail, String coveringStudentEmail,
                            String swapStatus, String shiftStatus, long requestTimestamp,
                            String startTime, String endTime, String duration,
-                           String date, String location, int totalWorkHours, String weekId) {
+                           String date, String location, int totalWorkHours, String weekId, String role) {
             this.shiftId = shiftId;
             this.requestedStudentEmail = requestedStudentEmail;
             this.coveringStudentEmail = coveringStudentEmail;
@@ -353,6 +357,7 @@ public class RequestSwapsActivity extends AppCompatActivity {
             this.location = location;
             this.totalWorkHours = totalWorkHours;
             this.weekId = weekId;
+            this.role = role;
         }
     }
 

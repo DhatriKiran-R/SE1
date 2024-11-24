@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class SignupActivity extends AppCompatActivity {
             String name = nameField.getText().toString().trim();
             String phone = phoneField.getText().toString().trim();
             String ssn = ssnField.getText().toString().trim();
+
             // Validate email and password
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(SignupActivity.this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
@@ -63,6 +65,7 @@ public class SignupActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             // Create a Firestore instance
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
+
                             // Prepare user data
                             Map<String, Object> userData = new HashMap<>();
                             userData.put("email", email);
@@ -71,19 +74,33 @@ public class SignupActivity extends AppCompatActivity {
                             userData.put("name", name);
                             userData.put("phone", phone);
                             userData.put("ssn", ssn);
-                            // Store user data in Firestore
-                            db.collection("users").document(user.getUid())
-                                    .set(userData)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Successfully added user with role
-                                        Toast.makeText(SignupActivity.this, "User created successfully!", Toast.LENGTH_SHORT).show();
-                                        Intent loginIntent = new Intent(SignupActivity.this, LoginActivity.class);
-                                        startActivity(loginIntent);
-                                        finish();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Handle failure
-                                        Toast.makeText(SignupActivity.this, "Error saving user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                            // Fetch FCM token
+                            FirebaseMessaging.getInstance().getToken()
+                                    .addOnCompleteListener(tokenTask -> {
+                                        if (tokenTask.isSuccessful()) {
+                                            // Get the FCM token
+                                            String token = tokenTask.getResult();
+                                            // Add FCM token to user data
+                                            userData.put("fcmToken", token);
+
+                                            // Store user data in Firestore
+                                            db.collection("users").document(user.getUid())
+                                                    .set(userData)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        // Successfully added user with role
+                                                        Toast.makeText(SignupActivity.this, "User created successfully!", Toast.LENGTH_SHORT).show();
+                                                        Intent loginIntent = new Intent(SignupActivity.this, LoginActivity.class);
+                                                        startActivity(loginIntent);
+                                                        finish();
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        // Handle failure
+                                                        Toast.makeText(SignupActivity.this, "Error saving user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    });
+                                        } else {
+                                            Toast.makeText(SignupActivity.this, "Error fetching FCM token", Toast.LENGTH_SHORT).show();
+                                        }
                                     });
                         } else {
                             // If sign-in fails, display a message

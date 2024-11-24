@@ -7,45 +7,75 @@
                                                    android:layout_height="match_parent"
                                                    tools:context=".CalendarDMActivity">
 
-    <Spinner
-        android:id="@+id/work_role_spinner"
-        android:layout_width="150dp"
-        android:layout_height="31dp"
+    <!-- CardView to wrap Role and Location Spinners -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.111" app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-    <Spinner
-        android:id="@+id/location_spinner"
-        android:layout_width="161dp"
-        android:layout_height="33dp"
-        android:layout_margin="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.879" app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="16dp"/>
-    <CalendarView
-        android:id="@+id/calendar_view"
-        android:layout_width="324dp"
-        android:layout_height="308dp"
-        android:layout_margin="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/location_spinner"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <Button
-        android:id="@+id/check_shifts_button"
+        <!-- LinearLayout to arrange Spinners side by side -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Work Role Spinner -->
+            <Spinner
+                android:id="@+id/work_role_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp" />
+
+            <!-- Location Spinner -->
+            <Spinner
+                android:id="@+id/location_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Buttons in Horizontal Layout -->
+    <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Check Shifts"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@+id/calendar_view"/>
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/card_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Date Picker Button -->
+        <Button
+            android:id="@+id/date_picker_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Date" />
+
+        <!-- Check Shifts Button -->
+        <Button
+            android:id="@+id/check_shifts_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Find"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- ScrollView for displaying shifts -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/check_shifts_button"
+        app:layout_constraintTop_toBottomOf="@id/layout"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,10 +86,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:padding="8dp"
-            android:scrollbars="vertical" />
+            android:padding="8dp" />
     </ScrollView>
-
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

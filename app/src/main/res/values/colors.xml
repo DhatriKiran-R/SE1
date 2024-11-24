@@ -10,8 +10,13 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="menuBackgroundColor">#2D3B45</color> <!-- Background color -->
-    <color name="menuSelectedTextColor">#FFFFFF</color> <!-- Replace with desired selected color -->
-    <color name="menuTextColor">#CCCCCC</color> <!-- Replace with desired default color -->
-
+    <color name="menuBackgroundColor">#2D3B45</color>
+    <color name="menuSelectedTextColor">#FFFFFF</color>
+    <color name="menuTextColor">#CCCCCC</color>
+    <color name="LightBlue">#2196F3</color>
+    <color name="colorAccentDark">#1976D2</color>
+    <color name="bottom_nav_item_icon">#9E9E9E</color> <!-- Grey color for icons -->
+    <color name="bottom_nav_item_text">#212121</color> <!-- Dark text for labels -->
+    <color name="bottom_nav_item_background">#F0F0F0</color> <!-- Light background for active item -->
+    <color name="bottom_nav_active_item">#6200EE</color>
 </resources>

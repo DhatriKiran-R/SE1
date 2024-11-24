@@ -7,84 +7,113 @@
     android:layout_height="match_parent"
     tools:context=".ShiftManagementDMActivity">
 
-    <Spinner
-        android:id="@+id/role_spinner"
+    <!-- CardView Wrapper -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Select Work Role"
+        android:layout_margin="16dp"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <Spinner
-        android:id="@+id/student_spinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="Select Student"
-        app:layout_constraintTop_toBottomOf="@id/role_spinner"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <RadioGroup
-        android:id="@+id/location_radio_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/student_spinner"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <RadioButton
-            android:id="@+id/location_commons"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Commons" />
+            android:padding="16dp">
 
-        <RadioButton
-            android:id="@+id/location_withe_connection"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Withe Connection" />
-    </RadioGroup>
+            <!-- Role Spinner -->
+            <Spinner
+                android:id="@+id/role_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Select Work Role"/>
 
-    <!-- Changed to reference the RadioGroup -->
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />  <!-- Added end constraint -->
+            <!-- Student Spinner -->
+            <Spinner
+                android:id="@+id/student_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Select Student"/>
 
-    <TextView
-        android:id="@+id/start_time_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="108dp"
-        android:background="@android:color/holo_blue_light"
-        android:padding="16dp"
-        android:text="@string/select_start_time"
-        android:textColor="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/location_radio_group" tools:layout_editor_absoluteX="2dp"/>
-    <!-- Added end constraint -->
+            <!-- Location RadioGroup -->
+            <RadioGroup
+                android:id="@+id/location_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/end_time_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@android:color/holo_blue_light"
-        android:padding="16dp"
-        android:text="@string/select_end_time"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/start_time_text"/>
-    <Button
-        android:id="@+id/submit_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/submit_shift"
-        app:layout_constraintTop_toBottomOf="@id/end_time_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+                <RadioButton
+                    android:id="@+id/location_commons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Commons"
+                    android:layout_marginEnd="16dp" />
+
+                <RadioButton
+                    android:id="@+id/location_withe_connection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="With Connection" />
+            </RadioGroup>
+
+            <!-- Horizontal Layout for Start Time and End Time -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:weightSum="2"
+                android:layout_marginBottom="16dp">
+
+                <!-- Start Time Button (Modernized with Hover Effect) -->
+                <TextView
+                    android:id="@+id/start_time_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="16dp"
+                    android:text="@string/select_start_time"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/button_hover"
+                    android:elevation="2dp"
+                />
+
+                <TextView
+                    android:id="@+id/end_time_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="16dp"
+                    android:text="@string/select_end_time"
+                    android:textColor="@android:color/white"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:background="@drawable/button_hover"
+                    android:elevation="2dp"/>
+            </LinearLayout>
+
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/submit_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/submit_shift"
+                android:layout_marginTop="16dp"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

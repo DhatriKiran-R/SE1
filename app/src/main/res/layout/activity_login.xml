@@ -17,8 +17,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="48dp"
         android:layout_marginBottom="32dp"
-        android:src="@mipmap/ic_launcher"
-        android:contentDescription="App Logo"/>
+        android:src="@drawable/app_logo"
+        android:contentDescription="@string/app_logo"/>
 
     <TextView
         android:id="@+id/login_title"

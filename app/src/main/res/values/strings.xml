@@ -23,6 +23,7 @@
     <string name="submit_shift">Submit Shift</string>
     <string name="select_end_time">Select End Time</string>
     <string name="select_start_time">Select Start Time</string>
+    <string name="app_logo">App Logo</string>
     <string-array name="roles_array">
         <item>Cook</item>
         <item>Server</item>
