@@ -1,0 +1,8 @@
+<!-- res/drawable/button_hover.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When the button is pressed or focused (simulating hover) -->
+    <item android:state_pressed="true" android:drawable="@color/colorAccentDark"/>
+
+    <!-- When the button is in its normal state -->
+    <item android:drawable="@color/LightBlue"/>
+</selector>
